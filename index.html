@@ -1,0 +1,197 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Drama Court · UI 方案</title>
+<style>
+/* ---------- 基础 ---------- */
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#111}
+#stage{position:relative;width:100vw;height:100vh;overflow:hidden;user-select:none;--court:#C05C36;--line:#F3EDE2}
+.floor{fill:var(--court)}
+#stage svg.court g{stroke:var(--line)}
+#stage svg.court{position:absolute;inset:0;width:100%;height:100%}
+.actor{position:absolute;transform:translate(-50%,-100%);cursor:pointer;z-index:5}
+.actor img{display:block;height:var(--h);width:auto;pointer-events:none;
+  filter:drop-shadow(-4px 3px 0 rgba(40,14,6,.10)) drop-shadow(3px 6px 8px rgba(40,14,6,.30))}
+.actor .sh{position:absolute;left:50%;bottom:-4px;transform:translateX(-50%);
+  width:calc(var(--h) * .46);height:calc(var(--h) * .10);border-radius:50%;
+  background:radial-gradient(ellipse at 42% 50%,rgba(46,16,6,.40),rgba(46,16,6,.14) 55%,transparent 74%)}
+.actor:hover{z-index:40}
+.card{position:absolute;z-index:60;opacity:0;pointer-events:none;transition:opacity .16s,transform .16s}
+.card.on{opacity:1}
+
+/* ---------- A. 纸本杂志 editorial ---------- */
+body[data-ui="editorial"]{background:#F7F4EE}
+body[data-ui="editorial"] #stage{background:#C05C36}
+body[data-ui="editorial"] .top{position:absolute;left:0;right:0;top:0;z-index:50;display:flex;
+  align-items:flex-start;justify-content:space-between;padding:34px 44px}
+body[data-ui="editorial"] .brand{color:#F7F4EE}
+body[data-ui="editorial"] .brand h1{margin:0;font:600 30px/1.15 "Songti SC",Georgia,serif;letter-spacing:.04em}
+body[data-ui="editorial"] .brand p{margin:8px 0 0;font:11.5px/1.6 ui-monospace,Menlo,monospace;
+  letter-spacing:.22em;text-transform:uppercase;opacity:.72}
+body[data-ui="editorial"] .tabs{display:flex;gap:26px;padding-top:8px}
+body[data-ui="editorial"] .tabs button{background:none;border:0;padding:6px 0;cursor:pointer;
+  font:13px/1 "Songti SC",Georgia,serif;letter-spacing:.14em;color:#F7F4EE;opacity:.62;
+  border-bottom:2px solid transparent}
+body[data-ui="editorial"] .tabs button.on{opacity:1;border-bottom-color:#F7F4EE}
+body[data-ui="editorial"] .card{width:330px;background:#F7F4EE;padding:22px 24px 20px;
+  box-shadow:0 18px 40px rgba(40,14,6,.22)}
+body[data-ui="editorial"] .card .no{font:10.5px/1.6 ui-monospace,Menlo,monospace;letter-spacing:.2em;color:#9A9views}
+body[data-ui="editorial"] .card h3{margin:8px 0 6px;font:600 21px/1.36 "Songti SC",Georgia,serif}
+body[data-ui="editorial"] .card .meta{font:11.5px/1.6 ui-monospace,Menlo,monospace;color:#7A736A;margin-bottom:10px}
+body[data-ui="editorial"] .card p{margin:0;font-size:13px;line-height:1.85;color:#2A2A2A}
+body[data-ui="editorial"] .card .tag{display:inline-block;margin-top:12px;font:11px/1 ui-monospace,Menlo,monospace;
+  padding:5px 9px;background:#D8F33A;color:#141414;border-radius:2px}
+
+/* ---------- B. 夜间剧场 cinema ---------- */
+body[data-ui="cinema"]{background:#0C0C0E}
+body[data-ui="cinema"] #stage{--court:#7A3318};
+body[data-ui="cinema"] #stage{background:#1a0f0a}
+body[data-ui="cinema"] #stage::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 45%,transparent 40%,rgba(0,0,0,.55) 100%)}
+body[data-ui="cinema"] .top{position:absolute;left:0;right:0;top:0;z-index:50;display:flex;
+  flex-direction:column;align-items:center;padding:30px 0 0}
+body[data-ui="cinema"] .brand{color:#F4EFE6;text-align:center;margin-bottom:18px}
+body[data-ui="cinema"] .brand h1{margin:0;font:600 17px/1 ui-monospace,Menlo,monospace;letter-spacing:.42em}
+body[data-ui="cinema"] .brand p{margin:9px 0 0;font:11px/1 ui-monospace,Menlo,monospace;letter-spacing:.3em;opacity:.5}
+body[data-ui="cinema"] .tabs{display:flex;gap:6px;padding:5px;border-radius:999px;
+  background:rgba(255,255,255,.08);backdrop-filter:blur(10px)}
+body[data-ui="cinema"] .tabs button{border:0;cursor:pointer;padding:9px 20px;border-radius:999px;
+  background:transparent;color:#F4EFE6;font:12px/1 ui-monospace,Menlo,monospace;letter-spacing:.18em;opacity:.6}
+body[data-ui="cinema"] .tabs button.on{background:#F4EFE6;color:#0C0C0E;opacity:1}
+body[data-ui="cinema"] .card{width:320px;background:rgba(14,14,16,.82);backdrop-filter:blur(16px);
+  border:1px solid rgba(216,243,58,.35);border-radius:14px;padding:20px 22px}
+body[data-ui="cinema"] .card .no{font:10px/1.6 ui-monospace,Menlo,monospace;letter-spacing:.24em;color:#D8F33A}
+body[data-ui="cinema"] .card h3{margin:9px 0 6px;font:600 18px/1.4 "PingFang SC";color:#F4EFE6}
+body[data-ui="cinema"] .card .meta{font:11px/1.6 ui-monospace,Menlo,monospace;color:#8E8A82;margin-bottom:10px}
+body[data-ui="cinema"] .card p{margin:0;font-size:12.5px;line-height:1.8;color:#C9C3B8}
+
+/* ---------- C. 档案标签 archive ---------- */
+body[data-ui="archive"]{background:#EFE9DC}
+body[data-ui="archive"] #stage{background:#C05C36;margin:0}
+body[data-ui="archive"] #stage::after{content:"";position:absolute;inset:26px;pointer-events:none;
+  border:2px solid #141414}
+body[data-ui="archive"] .top{position:absolute;left:0;right:0;top:0;z-index:50;display:flex;
+  align-items:flex-end;justify-content:space-between;padding:56px 60px 0}
+body[data-ui="archive"] .brand{color:#141414}
+body[data-ui="archive"] .brand h1{margin:0;font:700 20px/1 ui-monospace,Menlo,monospace;letter-spacing:.3em}
+body[data-ui="archive"] .brand p{margin:7px 0 0;font:11px/1 ui-monospace,Menlo,monospace;letter-spacing:.2em;color:#5C5346}
+body[data-ui="archive"] .tabs{display:flex;gap:4px}
+body[data-ui="archive"] .tabs button{cursor:pointer;padding:11px 20px 10px;border:2px solid #141414;
+  border-bottom:0;border-radius:6px 6px 0 0;background:#DCD3C2;font:12px/1 ui-monospace,Menlo,monospace;
+  letter-spacing:.16em;color:#3A342B}
+body[data-ui="archive"] .tabs button.on{background:#F7F4EE;transform:translateY(2px)}
+body[data-ui="archive"] .card{width:336px;background:#F7F4EE;border:2px solid #141414;border-radius:4px;
+  padding:20px 22px;box-shadow:8px 8px 0 rgba(20,20,20,.18)}
+body[data-ui="archive"] .card .no{font:10.5px/1.6 ui-monospace,Menlo,monospace;letter-spacing:.22em;color:#7A736A}
+body[data-ui="archive"] .card h3{margin:8px 0 7px;font:700 18px/1.42 ui-monospace,Menlo,monospace;letter-spacing:.01em}
+body[data-ui="archive"] .card .meta{font:11px/1.6 ui-monospace,Menlo,monospace;color:#6B6B6B;
+  border-top:1px dashed #B9AF9C;border-bottom:1px dashed #B9AF9C;padding:7px 0;margin-bottom:10px}
+body[data-ui="archive"] .card p{margin:0;font-size:12.5px;line-height:1.8}
+
+/* ---------- D. 街头贴纸 sticker ---------- */
+body[data-ui="sticker"]{background:#F3EDE0}
+body[data-ui="sticker"] #stage{background:#C05C36}
+body[data-ui="sticker"] .top{position:absolute;left:0;right:0;top:0;z-index:50;display:flex;
+  align-items:center;justify-content:space-between;padding:24px 30px}
+body[data-ui="sticker"] .brand{background:#F7F4EE;border:4px solid #141414;border-radius:14px;
+  padding:10px 18px;transform:rotate(-2deg);box-shadow:6px 6px 0 #141414}
+body[data-ui="sticker"] .brand h1{margin:0;font:900 22px/1 -apple-system,"PingFang SC";letter-spacing:-.02em}
+body[data-ui="sticker"] .brand p{margin:5px 0 0;font:10.5px/1 ui-monospace,Menlo,monospace;letter-spacing:.16em;font-weight:700}
+body[data-ui="sticker"] .tabs{display:flex;gap:10px}
+body[data-ui="sticker"] .tabs button{cursor:pointer;padding:12px 22px;border-radius:999px;border:4px solid #141414;
+  background:#F7F4EE;font:800 14px/1 -apple-system,"PingFang SC";box-shadow:4px 4px 0 #141414;transform:rotate(1deg)}
+body[data-ui="sticker"] .tabs button:nth-child(2){transform:rotate(-1.5deg)}
+body[data-ui="sticker"] .tabs button.on{background:#D8F33A;transform:rotate(0) translate(-1px,-1px);
+  box-shadow:6px 6px 0 #141414}
+body[data-ui="sticker"] .card{width:330px;background:#F7F4EE;border:4px solid #141414;border-radius:18px;
+  padding:18px 20px;box-shadow:9px 9px 0 #141414;transform:rotate(-1.2deg)}
+body[data-ui="sticker"] .card .no{display:inline-block;font:800 10.5px/1 ui-monospace,Menlo,monospace;
+  letter-spacing:.18em;background:#141414;color:#D8F33A;padding:6px 9px;border-radius:6px}
+body[data-ui="sticker"] .card h3{margin:11px 0 6px;font:900 19px/1.36 -apple-system,"PingFang SC";letter-spacing:-.01em}
+body[data-ui="sticker"] .card .meta{font:11px/1.6 ui-monospace,Menlo,monospace;color:#6B6B6B;margin-bottom:9px}
+body[data-ui="sticker"] .card p{margin:0;font-size:13px;line-height:1.75}
+body[data-ui="sticker"] .card .tag{display:inline-block;margin-top:11px;font:800 11px/1 -apple-system,"PingFang SC";
+  padding:7px 11px;border:3px solid #141414;border-radius:999px;background:#D8F33A}
+
+/* 角落切换器（只用于看稿，不属于设计稿本身） */
+.switcher{position:fixed;right:14px;bottom:14px;z-index:99;display:flex;gap:6px;
+  background:rgba(20,20,20,.82);padding:7px;border-radius:10px}
+.switcher button{border:0;cursor:pointer;padding:7px 12px;border-radius:7px;background:transparent;
+  color:#EFE9DC;font:11.5px/1 ui-monospace,Menlo,monospace;letter-spacing:.1em}
+.switcher button.on{background:#EFE9DC;color:#141414}
+</style></head><body data-ui="editorial">
+<div id="stage">
+  <svg class="court" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+    <rect class="floor" x="-400" y="-400" width="2400" height="1800"/>
+    <g stroke="#F3EDE2" stroke-width="7" fill="none" stroke-linecap="square">
+      <rect x="85" y="170" width="1431" height="660"/>
+      <rect x="85" y="252" width="1431" height="495"/>
+      <line x1="800" y1="170" x2="800" y2="830"/>
+      <line x1="470" y1="252" x2="470" y2="747"/>
+      <line x1="1130" y1="252" x2="1130" y2="747"/>
+      <line x1="470" y1="500" x2="1130" y2="500"/>
+    </g>
+    <g>
+      <rect x="793" y="170" width="14" height="660" fill="#E9E3D6" stroke="#141414" stroke-width="3"/>
+      <rect x="791" y="152" width="18" height="34" rx="3" fill="#F7F2E6" stroke="#141414" stroke-width="3"/>
+      <rect x="791" y="814" width="18" height="34" rx="3" fill="#F7F2E6" stroke="#141414" stroke-width="3"/>
+    </g>
+  </svg>
+
+  <header class="top">
+    <div class="brand"><h1>DRAMA COURT</h1><p>网球场外档案</p></div>
+    <nav class="tabs">
+      <button class="on">红土</button><button>硬地</button><button>草地</button>
+    </nav>
+  </header>
+
+  <div class="actor" data-c="1" style="left:30%;top:83%;--h:26vh"><div class="sh"></div><img src="assets/federer.webp"></div>
+  <div class="actor" data-c="2" style="left:72%;top:72%;--h:24vh"><div class="sh"></div><img src="assets/zverev.webp"></div>
+  <div class="actor" data-c="3" style="left:62%;top:37%;--h:21vh"><div class="sh"></div><img src="assets/medvedev.webp"></div>
+  <div class="actor" data-c="4" style="left:17%;top:95%;--h:27vh"><div class="sh"></div><img src="assets/nadal.webp"></div>
+  <div class="actor" data-c="5" style="left:74%;top:50%;--h:23vh"><div class="sh"></div><img src="assets/djokovic.webp"></div>
+  <div class="actor" data-c="6" style="left:41%;top:60%;--h:24vh"><div class="sh"></div><img src="assets/serena.webp"></div>
+  <div class="actor" data-c="7" style="left:52%;top:76%;--h:23vh"><div class="sh"></div><img src="assets/alcaraz.webp"></div>
+  <div class="actor" data-c="12" style="left:13%;top:64%;--h:22vh"><div class="sh"></div><img src="assets/kyrgios.webp"></div>
+
+  <div class="card" id="card"></div>
+</div>
+
+<div class="switcher">
+  <button data-ui="editorial" class="on">A 纸本杂志</button>
+  <button data-ui="cinema">B 夜间剧场</button>
+  <button data-ui="archive">C 档案标签</button>
+  <button data-ui="sticker">D 街头贴纸</button>
+</div>
+
+<script>
+const DATA={
+ 1:{no:"CASE #001",t:"一个球迷冲进场，把红帽子扣在他头上",m:"2009.06.07 · 法网决赛",p:"他正准备接发球，一个穿巴萨球衣的人翻进场内，举着红帽往他头上扣。他一边后退一边推开对方，最后跳过球网才甩开。",tag:"荒诞"},
+ 2:{no:"CASE #002",t:"主裁不肯下场看球印，他掏出手机自己拍",m:"2025.04.27 · 马德里",p:"电子司线判压线，他坚持球印在界外。主裁说系统判定不能改，于是他蹲下去把那个印子拍了下来，随后吃到警告。",tag:"较真"},
+ 3:{no:"CASE #003",t:"红土是给失败者准备的",m:"2023–2024 · 多次",p:"他说要是喜欢像狗一样在泥里打滚，他不评价。后来在蒙特卡洛用法语道歉：我说得夸张了，夸张了很多。",tag:"嘴臭"},
+ 4:{no:"CASE #004",t:"两瓶水必须摆成一条线",m:"长期 · 每次发球前",p:"瓶子斜着放、标签朝固定方向，摆不整齐就不发球。全场都在等他摆完。",tag:"强迫症"},
+ 5:{no:"CASE #005",t:"一个闭眼都能得分的球，他扎进了网里",m:"2013.06.06 · 法网半决赛",p:"决胜盘他要拿下这一分，挥拍后整个人撞进网内，被判触网丢分，随后被破发。",tag:"翻车"},
+ 6:{no:"CASE #006",t:"她穿了一身黑，法网第二年就把这套衣服禁了",m:"2018.05.29 · 法网首轮",p:"一件黑色连体战袍。她 7-6、6-4 赢下比赛，赛后说自己像瓦坎达的女王。法网随后收紧着装规定。",tag:"出格"},
+ 7:{no:"CASE #007",t:"全世界都以为他伤了，他说只是紧张",m:"2023.06.09 · 法网半决赛",p:"前两盘 1-1，第三盘开始他全身抽筋，几乎走不动。赛后他说：不是身体问题，是我太紧张了。",tag:"崩了"},
+ 12:{no:"CASE #012",t:"砸拍、踢水瓶，然后把椅子甩进场",m:"2019.05.16 · 罗马大师赛",p:"先摔拍，再踢水瓶，最后拎起一把椅子扔向场地中央，然后直接走人。他被取消资格并罚款。",tag:"炸了"}
+};
+const card=document.getElementById('card');
+document.querySelectorAll('.actor').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{
+    const d=DATA[el.dataset.c]; if(!d) return;
+    card.innerHTML=`<div class="no">${d.no}</div><h3>${d.t}</h3><div class="meta">${d.m}</div><p>${d.p}</p><span class="tag">${d.tag}</span>`;
+    const r=el.getBoundingClientRect();
+    let x=r.left+r.width/2+70, y=r.top-30;
+    if(x+360>innerWidth) x=r.left-360;
+    if(y<120) y=120;
+    if(y+300>innerHeight) y=innerHeight-300;
+    card.style.left=x+'px'; card.style.top=y+'px'; card.classList.add('on');
+  });
+  el.addEventListener('mouseleave',()=>card.classList.remove('on'));
+});
+document.querySelectorAll('.switcher button').forEach(b=>b.addEventListener('click',()=>{
+  document.body.dataset.ui=b.dataset.ui;
+  document.querySelectorAll('.switcher button').forEach(x=>x.classList.toggle('on',x===b));
+}));
+if(location.hash) document.body.dataset.ui=location.hash.slice(1);
+</script></body></html>
