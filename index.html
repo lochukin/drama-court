@@ -75,10 +75,46 @@ body.editing .actor.drag::after{border-color:var(--accent);border-style:solid}
   backdrop-filter:blur(10px);transition:.15s}
 .bar button:hover{background:rgba(20,20,20,.75)}
 .bar button.on{background:var(--accent);color:var(--ink);border-color:var(--accent);font-weight:700}
+.edit-cta{position:absolute;right:26px;top:26px;padding:8px 14px;border-radius:999px;
+  border:1.5px solid rgba(20,20,20,.35);background:rgba(247,244,238,.7);color:#141414;
+  font:600 12.5px/1 -apple-system,"PingFang SC";cursor:pointer;backdrop-filter:blur(8px)}
+.edit-cta.on{background:var(--accent);border-color:#141414}
+#inspector{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);display:none;
+  align-items:center;gap:12px;padding:10px 16px;border-radius:14px;z-index:60;
+  background:rgba(24,17,12,.78);color:#F7F4EE;backdrop-filter:blur(12px);
+  font:12px/1 -apple-system,"PingFang SC";box-shadow:0 8px 28px rgba(0,0,0,.28)}
+body.editing #inspector.on{display:flex}
+#inspector b{font-weight:600;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#inspector label{display:flex;align-items:center;gap:5px;opacity:.9}
+#inspector input[type=number]{width:58px;padding:4px 6px;border-radius:6px;border:1px solid rgba(255,255,255,.25);
+  background:rgba(255,255,255,.1);color:#fff;font:12px/1 ui-monospace,Menlo,monospace}
+#inspector input[type=range]{width:110px;accent-color:#D8F33A}
+#inspector i{font-style:normal;width:22px;text-align:right;opacity:.75;font-family:ui-monospace,Menlo,monospace}
+#inspector button{padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.28);
+  background:rgba(255,255,255,.1);color:#fff;cursor:pointer;font-size:12px}
+body.editing .actor.sel{outline:2px solid #D8F33A;outline-offset:2px}
 .hint{position:fixed;left:18px;bottom:16px;z-index:80;font:11px/1.7 var(--mono);color:rgba(247,244,238,.72);
   background:rgba(20,20,20,.42);padding:9px 14px;border-radius:10px;backdrop-filter:blur(10px);
   pointer-events:none;opacity:0;transition:.2s}
-body.editing .hint{opacity:1}
+body.editing .edit-cta{position:absolute;right:26px;top:26px;padding:8px 14px;border-radius:999px;
+  border:1.5px solid rgba(20,20,20,.35);background:rgba(247,244,238,.7);color:#141414;
+  font:600 12.5px/1 -apple-system,"PingFang SC";cursor:pointer;backdrop-filter:blur(8px)}
+.edit-cta.on{background:var(--accent);border-color:#141414}
+#inspector{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);display:none;
+  align-items:center;gap:12px;padding:10px 16px;border-radius:14px;z-index:60;
+  background:rgba(24,17,12,.78);color:#F7F4EE;backdrop-filter:blur(12px);
+  font:12px/1 -apple-system,"PingFang SC";box-shadow:0 8px 28px rgba(0,0,0,.28)}
+body.editing #inspector.on{display:flex}
+#inspector b{font-weight:600;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#inspector label{display:flex;align-items:center;gap:5px;opacity:.9}
+#inspector input[type=number]{width:58px;padding:4px 6px;border-radius:6px;border:1px solid rgba(255,255,255,.25);
+  background:rgba(255,255,255,.1);color:#fff;font:12px/1 ui-monospace,Menlo,monospace}
+#inspector input[type=range]{width:110px;accent-color:#D8F33A}
+#inspector i{font-style:normal;width:22px;text-align:right;opacity:.75;font-family:ui-monospace,Menlo,monospace}
+#inspector button{padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.28);
+  background:rgba(255,255,255,.1);color:#fff;cursor:pointer;font-size:12px}
+body.editing .actor.sel{outline:2px solid #D8F33A;outline-offset:2px}
+.hint{opacity:1}
 .empty{position:absolute;inset:0;display:none;place-items:center;z-index:20;pointer-events:none}
 body.empty .empty{display:grid}
 .empty span{font:13px/1 var(--mono);letter-spacing:.3em;color:rgba(247,244,238,.72);
@@ -114,6 +150,7 @@ body.empty .empty{display:grid}
 
   <header class="top">
     <div class="brand"><h1>DRAMA COURT</h1><p>网球场外档案</p></div>
+    <button class="edit-cta" id="edit">调整</button>
     <nav class="tabs" id="tabs">
       <button data-s="clay" class="on">红土</button>
       <button data-s="hard">硬地</button>
@@ -123,11 +160,17 @@ body.empty .empty{display:grid}
 
   <div class="empty"><span>暂无收录</span></div>
   <div class="card" id="card"></div>
+  <div id="inspector">
+    <b id="inspName">—</b>
+    <label>X<input id="inX" type="number" step="1"></label>
+    <label>Y<input id="inY" type="number" step="1"></label>
+    <label class="rg">大小<input id="inHead" type="range" min="14" max="70" step="1"><i id="inHeadV">32</i></label>
+    <button id="inReset">复位</button>
+  </div>
 </div>
 
-<div class="hint">拖动移动 · 滚轮缩放 · 双击复位 · 改完点「导出坐标」</div>
+<div class="hint">拖动移动 · 滚轮缩放 · 双击复位 · 方向键微调（Shift ×10）· 改完点「导出坐标」</div>
 <div class="bar">
-  <button id="edit">编辑位置</button>
   <button id="expo" hidden>导出坐标</button>
 </div>
 
@@ -189,7 +232,8 @@ const EVENTS=[
 const stage=document.getElementById('stage'), card=document.getElementById('card');
 const KEY='dc-pos-v1';
 const saved=JSON.parse(localStorage.getItem(KEY)||'{}');
-let editing=false, surface='clay';
+let editing=false, surface='clay', sel=null;
+const insp=document.getElementById('inspector');
 
 EVENTS.forEach(e=>{
   if(saved[e.id]){ e.x=saved[e.id].x; e.y=saved[e.id].y; e.head=saved[e.id].head; }
@@ -222,6 +266,7 @@ function bind(el,e){
   let drag=false,sx=0,sy=0,ox=0,oy=0,moved=false;
   el.addEventListener('pointerdown',ev=>{
     if(!editing) return;
+    select(el,e);
     ev.preventDefault(); el.setPointerCapture(ev.pointerId); el.classList.add('drag');
     drag=true; moved=false; sx=ev.clientX; sy=ev.clientY;
     ox=parseFloat(el.style.left); oy=parseFloat(el.style.top);
@@ -267,6 +312,46 @@ function bind(el,e){
   el.addEventListener('mouseleave',()=>{ el.classList.remove('hot'); card.classList.remove('on'); });
 }
 
+function apply(el,e){
+  el.style.left=e.x+'px'; el.style.top=e.y+'px';
+  el.style.setProperty('--head',e.head+'px');
+  el.querySelector('img').style.height='calc(var(--head) * var(--r))';
+  document.getElementById('inX').value=Math.round(e.x);
+  document.getElementById('inY').value=Math.round(e.y);
+  document.getElementById('inHead').value=Math.round(e.head);
+  document.getElementById('inHeadV').textContent=Math.round(e.head);
+}
+function select(el,e){
+  stage.querySelectorAll('.actor.sel').forEach(n=>n.classList.remove('sel'));
+  el.classList.add('sel'); sel={el,e};
+  document.getElementById('inspName').textContent=`#${String(e.id).padStart(3,'0')} ${e.img}`;
+  apply(el,e); insp.classList.add('on');
+}
+['inX','inY'].forEach(id=>document.getElementById(id).addEventListener('input',ev=>{
+  if(!sel) return; const v=parseFloat(ev.target.value)||0;
+  if(id==='inX') sel.e.x=v; else sel.e.y=v;
+  apply(sel.el,sel.e); persist();
+}));
+document.getElementById('inHead').addEventListener('input',ev=>{
+  if(!sel) return; sel.e.head=+ev.target.value; apply(sel.el,sel.e); persist();
+});
+document.getElementById('inReset').addEventListener('click',()=>{
+  if(!sel) return; const d=DEF[sel.e.id];
+  sel.e.x=d.x; sel.e.y=d.y; sel.e.head=d.head; apply(sel.el,sel.e); persist();
+});
+addEventListener('keydown',ev=>{
+  if(!editing||!sel) return;
+  const st=ev.shiftKey?10:1;
+  const m={ArrowLeft:[-st,0],ArrowRight:[st,0],ArrowUp:[0,-st],ArrowDown:[0,st]}[ev.key];
+  if(m){ ev.preventDefault(); sel.e.x+=m[0]; sel.e.y+=m[1]; apply(sel.el,sel.e); persist(); return; }
+  if(ev.key==='+'||ev.key==='='){ sel.e.head=Math.min(70,sel.e.head+1); apply(sel.el,sel.e); persist(); }
+  if(ev.key==='-'){ sel.e.head=Math.max(14,sel.e.head-1); apply(sel.el,sel.e); persist(); }
+  if(ev.key==='Escape'){ sel.el.classList.remove('sel'); sel=null; insp.classList.remove('on'); }
+});
+stage.addEventListener('pointerdown',ev=>{
+  if(ev.target===stage||ev.target.tagName==='svg'){ stage.querySelectorAll('.actor.sel').forEach(n=>n.classList.remove('sel')); sel=null; insp.classList.remove('on'); }
+});
+
 const DEF={};
 EVENTS.forEach(e=>DEF[e.id]={x:e.x,y:e.y,head:e.head});
 
@@ -286,7 +371,8 @@ editBtn.addEventListener('click',()=>{
   editing=!editing;
   document.body.classList.toggle('editing',editing);
   editBtn.classList.toggle('on',editing);
-  editBtn.textContent=editing?'完成编辑':'编辑位置';
+  editBtn.textContent=editing?'完成':'调整';
+  if(!editing){ sel=null; insp.classList.remove('on'); stage.querySelectorAll('.actor.sel').forEach(n=>n.classList.remove('sel')); }
   expoBtn.hidden=!editing;
   card.classList.remove('on');
 });
@@ -300,4 +386,8 @@ expoBtn.addEventListener('click',()=>{
 
 render();
 if(location.search.includes('edit')) document.getElementById('edit').click();
+if(location.search.includes('sel')){
+  setTimeout(()=>{ const a=stage.querySelector('.actor[data-s="clay"]');
+    if(a) a.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true})); },120);
+}
 </script></body></html>
