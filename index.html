@@ -65,6 +65,9 @@ body.editing .actor.drag::after{border-color:var(--accent);border-style:solid}
 .card .meta{font:11px/1.6 var(--mono);color:#6B6B6B;margin-bottom:10px;
   padding-bottom:9px;border-bottom:1px solid rgba(20,20,20,.10)}
 .card p{margin:0;font-size:12.5px;line-height:1.8;color:#2A2A2A}
+.card .more{display:inline-block;margin-top:14px;font-size:13px;text-decoration:none;
+  border-bottom:1px solid currentColor;opacity:.8}
+.card .more:hover{opacity:1}
 .card .tag{display:inline-block;margin-top:11px;font:11px/1 var(--mono);
   padding:5px 9px;background:var(--accent);color:var(--ink);border-radius:999px}
 
@@ -171,6 +174,7 @@ body.empty .empty{display:grid}
 
 <div class="hint">拖动移动 · 滚轮缩放 · 双击复位 · 方向键微调（Shift ×10）· 改完点「导出坐标」</div>
 <div class="bar">
+  <button id="reset" hidden>全部复位</button>
   <button id="expo" hidden>导出坐标</button>
 </div>
 
@@ -210,7 +214,7 @@ const EVENTS=[
   t:"脸已经着地了，他还是把这一分赢了", m:"2025.05.30 · 法网第三轮", tag:"滑稽",
   p:"追一个短球时他整个人趴在红土上，球还没到，脸先到了。结果他躺在地上单手把球抽回去，还赢下这一分。赛后自嘲：那是我红土移动太差，不是我鱼跃。"},
  {id:14, s:"clay", img:"medvedev2", x:300, y:177, head:31, r:5.9, f:-1, sw:1.15,
-  t:"把球拍摔成两半，然后踢上看台", m:"2024 · 汉堡", tag:"炸了",
+  t:"连砸七下，然后把拍子扔进垃圾桶", m:"2025 · 红土赛季", tag:"炸了",
   p:"红土上又一个失控的下午。他把拍子砸在地上，再一脚踢进看台，被罚分。"},
  {id:16, s:"clay", img:"wawrinka", x:1355, y:276, head:28, r:5.7, f:1, sw:1,
   t:"他穿一条格子短裤打决赛，然后赢了", m:"2015.06.07 · 法网决赛", tag:"怪人",
@@ -230,6 +234,7 @@ const EVENTS=[
 ];
 
 const stage=document.getElementById('stage'), card=document.getElementById('card');
+const PAGES=new Set([1,2,3,4,5,6,7,9,11,12,13,14,16,17]);
 const KEY='dc-pos-v1';
 const saved=JSON.parse(localStorage.getItem(KEY)||'{}');
 let editing=false, surface='clay', sel=null;
@@ -301,7 +306,8 @@ function bind(el,e){
     if(editing){ el.classList.add('hot'); return; }
     el.classList.add('hot');
     card.innerHTML=`<div class="no">CASE #${String(e.id).padStart(3,'0')}</div><h3>${e.t}</h3>
-      <div class="meta">${e.m}</div><p>${e.p}</p><span class="tag">${e.tag}</span>`;
+      <div class="meta">${e.m}</div><p>${e.p}</p><span class="tag">${e.tag}</span>
+      ${PAGES.has(e.id)?`<a class="more" href="cases/${e.id}.html">查看完整条目 →</a>`:''}`;
     const r=el.getBoundingClientRect();
     let x=r.left+r.width/2+80, y=r.top-40;
     if(x+340>innerWidth) x=r.left-340;
@@ -373,8 +379,13 @@ editBtn.addEventListener('click',()=>{
   editBtn.classList.toggle('on',editing);
   editBtn.textContent=editing?'完成':'调整';
   if(!editing){ sel=null; insp.classList.remove('on'); stage.querySelectorAll('.actor.sel').forEach(n=>n.classList.remove('sel')); }
-  expoBtn.hidden=!editing;
+  expoBtn.hidden=!editing; document.getElementById('reset').hidden=!editing;
   card.classList.remove('on');
+});
+document.getElementById('reset').addEventListener('click',()=>{
+  if(!confirm('把所有人物恢复到默认位置和大小？')) return;
+  EVENTS.forEach(e=>{ e.x=DEF[e.id].x; e.y=DEF[e.id].y; e.head=DEF[e.id].head; });
+  localStorage.removeItem(KEY); sel=null; insp.classList.remove('on'); render();
 });
 expoBtn.addEventListener('click',()=>{
   const o={};
@@ -386,6 +397,10 @@ expoBtn.addEventListener('click',()=>{
 
 render();
 if(location.search.includes('edit')) document.getElementById('edit').click();
+if(location.search.includes('open')){
+  setTimeout(()=>{ const a=stage.querySelector('.actor[data-id="2"]');
+    if(a) a.dispatchEvent(new Event('mouseenter')); },200);
+}
 if(location.search.includes('sel')){
   setTimeout(()=>{ const a=stage.querySelector('.actor[data-s="clay"]');
     if(a) a.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true})); },120);
