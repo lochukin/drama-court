@@ -61,7 +61,7 @@ body.editing .actor.drag::after{border-color:var(--accent);border-style:solid}
   background:rgba(247,244,238,.96);border:1px solid rgba(20,20,20,.16);border-radius:14px;
   box-shadow:0 24px 60px rgba(40,14,6,.28);backdrop-filter:blur(18px);
   opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .15s,transform .15s}
-.card.on{opacity:1;transform:translateY(0)}
+.card.on{opacity:1;transform:translateY(0);pointer-events:auto}
 .card .no{font:10px/1.6 var(--mono);letter-spacing:.24em;color:#8C8478}
 .card h3{margin:9px 0 6px;font:600 18px/1.42 "Songti SC",Georgia,serif}
 .card .meta{font:11px/1.6 var(--mono);color:#6B6B6B;margin-bottom:10px;
@@ -245,6 +245,9 @@ let SCALE=1;
 function fit(){ SCALE=Math.min(innerWidth/1600, innerHeight/1000);
   board.style.transform=`translate(-50%,-50%) scale(${SCALE})`; }
 addEventListener('resize',fit);
+let hideTimer=null;
+const cancelHide=()=>{ if(hideTimer){ clearTimeout(hideTimer); hideTimer=null; } };
+const scheduleHide=()=>{ cancelHide(); hideTimer=setTimeout(()=>{ card.classList.remove('on'); }, 260); };
 const PAGES=new Set([1,2,3,4,5,6,7,9,11,12,13,14,16,17]);
 const KEY='dc-pos-v1';
 const saved=JSON.parse(localStorage.getItem(KEY)||'{}');
@@ -316,6 +319,7 @@ function bind(el,e){
   });
   el.addEventListener('mouseenter',()=>{
     if(editing){ el.classList.add('hot'); return; }
+    cancelHide();
     el.classList.add('hot');
     card.innerHTML=`<div class="no">CASE #${String(e.id).padStart(3,'0')}</div><h3>${e.t}</h3>
       <div class="meta">${e.m}</div><p>${e.p}</p><span class="tag">${e.tag}</span>
@@ -327,7 +331,7 @@ function bind(el,e){
     if(y+290>innerHeight) y=innerHeight-290;
     card.style.left=x+'px'; card.style.top=y+'px'; card.classList.add('on');
   });
-  el.addEventListener('mouseleave',()=>{ el.classList.remove('hot'); card.classList.remove('on'); });
+  el.addEventListener('mouseleave',()=>{ el.classList.remove('hot'); scheduleHide(); });
 }
 
 function apply(el,e){
@@ -408,6 +412,8 @@ expoBtn.addEventListener('click',()=>{
 });
 
 fit();
+card.addEventListener('mouseenter',cancelHide);
+card.addEventListener('mouseleave',scheduleHide);
 render();
 requestAnimationFrame(()=>fit());
 if(location.search.includes('edit')) document.getElementById('edit').click();
