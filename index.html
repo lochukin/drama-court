@@ -16,9 +16,11 @@ html,body{margin:0;height:100%;overflow:hidden;background:#C05C36;
   --court:#C05C36;--line:#F3EDE2;--net:#E9E3D6;background:var(--court)}
 body[data-s="hard"]  #stage{--court:#2F6BA6}
 body[data-s="grass"] #stage{--court:#4F8A46;--line:#FAF7EF}
+#stage::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;
+  background:radial-gradient(125% 88% at 50% 44%,rgba(60,20,8,0) 38%,rgba(60,20,8,.20) 100%)}
 #stage::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
-  background-image:radial-gradient(rgba(120,45,20,.13) 1px,transparent 1px),
-                   radial-gradient(rgba(255,220,190,.09) 1px,transparent 1px);
+  background-image:radial-gradient(rgba(120,45,20,.20) 1px,transparent 1px),
+                   radial-gradient(rgba(255,220,190,.13) 1px,transparent 1px);
   background-size:7px 7px,11px 11px;background-position:0 0,3px 5px}
 svg.court{position:absolute;inset:0;width:100%;height:100%}
 .floor{fill:var(--court)}
@@ -50,7 +52,16 @@ svg.court{position:absolute;inset:0;width:100%;height:100%}
   drop-shadow(0 0 10px rgba(216,243,58,.85))}
 
 /* 编辑模式 */
+.actor::before{content:"";position:absolute;left:50%;bottom:-3px;
+  width:calc(var(--head) * 1.45);height:calc(var(--head) * 0.40);transform:translateX(-50%);
+  border-radius:50%;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 50%,rgba(58,22,10,.46),rgba(58,22,10,.18) 55%,rgba(58,22,10,0) 74%)}
+@keyframes figIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.actor img{animation:figIn .55s cubic-bezier(.2,.8,.25,1) backwards;
+  transition:transform .22s cubic-bezier(.2,.8,.25,1),filter .22s}
+.actor:hover img{transform:translateY(-5px) scale(1.035)}
 body.editing .actor{cursor:grab;outline:0}
+body.editing .actor:hover img{transform:none}
 body.editing .actor::after{content:"";position:absolute;inset:-6px;border:1.5px dashed rgba(247,244,238,.75);
   border-radius:8px;pointer-events:none}
 body.editing .actor.drag{cursor:grabbing;z-index:90}
@@ -63,15 +74,15 @@ body.editing .actor.drag::after{border-color:var(--accent);border-style:solid}
   opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .15s,transform .15s}
 .card.on{opacity:1;transform:translateY(0);pointer-events:auto}
 .card .no{font:10px/1.6 var(--mono);letter-spacing:.24em;color:#8C8478}
-.card h3{margin:9px 0 6px;font:600 18px/1.42 "Songti SC",Georgia,serif}
+.card h3{margin:10px 0 7px;font:600 19px/1.45 "Songti SC",Georgia,serif;letter-spacing:.01em}
 .card .meta{font:11px/1.6 var(--mono);color:#6B6B6B;margin-bottom:10px;
   padding-bottom:9px;border-bottom:1px solid rgba(20,20,20,.10)}
 .card p{margin:0;font-size:12.5px;line-height:1.8;color:#2A2A2A}
 .card .more{display:inline-block;margin-top:14px;font-size:13px;text-decoration:none;
   border-bottom:1px solid currentColor;opacity:.8}
 .card .more:hover{opacity:1}
-.card .tag{display:inline-block;margin-top:11px;font:11px/1 var(--mono);
-  padding:5px 9px;background:var(--accent);color:var(--ink);border-radius:999px}
+.card .tag{display:inline-block;margin-top:12px;font:10.5px/1 var(--mono);letter-spacing:.08em;
+  padding:6px 10px;background:var(--accent);color:var(--ink);border-radius:999px}
 
 /* ---------- 工具条 ---------- */
 .bar{position:fixed;right:18px;bottom:16px;z-index:80;display:flex;gap:8px;align-items:center}
@@ -80,9 +91,11 @@ body.editing .actor.drag::after{border-color:var(--accent);border-style:solid}
   backdrop-filter:blur(10px);transition:.15s}
 .bar button:hover{background:rgba(20,20,20,.75)}
 .bar button.on{background:var(--accent);color:var(--ink);border-color:var(--accent);font-weight:700}
-.edit-cta{position:absolute;right:26px;top:26px;padding:8px 14px;border-radius:999px;
-  border:1.5px solid rgba(20,20,20,.35);background:rgba(247,244,238,.7);color:#141414;
-  font:600 12.5px/1 -apple-system,"PingFang SC";cursor:pointer;backdrop-filter:blur(8px);pointer-events:auto}
+.edit-cta{position:absolute;right:26px;top:26px;padding:7px 13px;border-radius:999px;
+  border:1px solid rgba(20,20,20,.22);background:rgba(247,244,238,.55);color:#4A4A4A;
+  font:500 11.5px/1 -apple-system,"PingFang SC";cursor:pointer;backdrop-filter:blur(8px);
+  pointer-events:auto;opacity:.62;transition:.2s}
+.edit-cta:hover{opacity:1}
 .edit-cta.on{background:var(--accent);border-color:#141414}
 #inspector{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);display:none;
   align-items:center;gap:12px;padding:10px 16px;border-radius:14px;z-index:60;
@@ -101,9 +114,11 @@ body.editing .actor.sel{outline:2px solid #D8F33A;outline-offset:2px}
 .hint{position:fixed;left:18px;bottom:16px;z-index:80;font:11px/1.7 var(--mono);color:rgba(247,244,238,.72);
   background:rgba(20,20,20,.42);padding:9px 14px;border-radius:10px;backdrop-filter:blur(10px);
   pointer-events:none;opacity:0;transition:.2s}
-body.editing .edit-cta{position:absolute;right:26px;top:26px;padding:8px 14px;border-radius:999px;
-  border:1.5px solid rgba(20,20,20,.35);background:rgba(247,244,238,.7);color:#141414;
-  font:600 12.5px/1 -apple-system,"PingFang SC";cursor:pointer;backdrop-filter:blur(8px);pointer-events:auto}
+body.editing .edit-cta{position:absolute;right:26px;top:26px;padding:7px 13px;border-radius:999px;
+  border:1px solid rgba(20,20,20,.22);background:rgba(247,244,238,.55);color:#4A4A4A;
+  font:500 11.5px/1 -apple-system,"PingFang SC";cursor:pointer;backdrop-filter:blur(8px);
+  pointer-events:auto;opacity:.62;transition:.2s}
+.edit-cta:hover{opacity:1}
 .edit-cta.on{background:var(--accent);border-color:#141414}
 #inspector{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);display:none;
   align-items:center;gap:12px;padding:10px 16px;border-radius:14px;z-index:60;
@@ -119,7 +134,7 @@ body.editing #inspector.on{display:flex}
 #inspector button{padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.28);
   background:rgba(255,255,255,.1);color:#fff;cursor:pointer;font-size:12px}
 body.editing .actor.sel{outline:2px solid #D8F33A;outline-offset:2px}
-.hint{opacity:1}
+body.editing .hint{opacity:1}
 .empty-note{position:absolute;inset:0;display:none;place-items:center;z-index:20;pointer-events:none}
 body.empty .empty-note{display:grid}
 .empty-note span{font:12.5px/1 var(--mono);letter-spacing:.18em;color:#141414;
@@ -280,7 +295,9 @@ function render(){
     el.className='actor'; el.dataset.id=e.id; el.dataset.s=e.s;
     el.style.cssText=`left:${e.x}px;top:${e.y}px;--head:${e.head}px;--r:${e.r};--flip:${e.f};--sw:${e.sw||1}`;
     el.innerHTML=`<div class="sh"></div><img src="assets/${e.img}.webp" alt="">`;
-    el.querySelector('img').style.height=`calc(var(--head) * var(--r))`;
+    const im=el.querySelector('img');
+    im.style.height=`calc(var(--head) * var(--r))`;
+    im.style.animationDelay=(EVENTS.indexOf(e)*38)+'ms';
     bind(el,e); actorsLayer.appendChild(el);
   });
   applySurface();
